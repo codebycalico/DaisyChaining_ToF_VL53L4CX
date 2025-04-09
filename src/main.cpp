@@ -35,101 +35,97 @@
  * OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *
- ******************************************************************************
- */
-/*
- * To use this sketch you need to connect the VL53L4CD satellite sensor directly to the Nucleo board with wires in this way:
- * pin 1 (GND) of the VL53L4CD satellite connected to GND of the Nucleo board
- * pin 2 (VDD) of the VL53L4CD satellite connected to 3V3 pin of the Nucleo board
- * pin 3 (SCL) of the VL53L4CD satellite connected to pin D15 (SCL) of the Nucleo board
- * pin 4 (SDA) of the VL53L4CD satellite connected to pin D14 (SDA) of the Nucleo board
- * pin 5 (GPIO1) of the VL53L4CD satellite connected to pin A2 of the Nucleo board
- * pin 6 (XSHUT) of the VL53L4CD satellite connected to pin A1 of the Nucleo board
- */
-/* Includes ------------------------------------------------------------------*/
-#include <Arduino.h>
-#include <Wire.h>
-#include <vl53l4cx_class.h>
+ ******************************************************************************/
+// Adapted by Calico Randall for OMSI's How Fast
+// Chaining multiple ToF VL53L4CX sensors together
+// April 8, 2025
 
-#define DEV_I2C Wire
-
-#define LEDPIN 13
-
-// Components.
-VL53L4CX sensor_vl53l4cx_sat(&DEV_I2C, A1);
-
-/* Setup ---------------------------------------------------------------------*/
+#include "sensors.h"
 
 void setup()
 {
-  // Led.
+  // LED
   pinMode(LEDPIN, OUTPUT);
 
-  // Initialize serial for output.
-  Serial.begin(115200);
-  Serial.println("Starting...");
-
-  // Initialize I2C bus.
-  DEV_I2C.begin();
-  Serial.println("I2C initialized.");
-
-  // Configure VL53L4CX satellite component.
-  sensor_vl53l4cx_sat.begin();
-
-  // Switch off VL53L4CX satellite component.
-  sensor_vl53l4cx_sat.VL53L4CX_Off();
-
-  //Initialize VL53L4CX satellite component.
-  sensor_vl53l4cx_sat.InitSensor(0x12);
-  Serial.println("Satellite component initialized.");
-
-  // Start Measurements
-  sensor_vl53l4cx_sat.VL53L4CX_StartMeasurement();
-  Serial.println("Setup complete.");
-  Serial.println("Measurements starting...");
+  setupSensors();
 }
 
 void loop()
 {
-  VL53L4CX_MultiRangingData_t MultiRangingData;
-  VL53L4CX_MultiRangingData_t *pMultiRangingData = &MultiRangingData;
+  VL53L4CX_MultiRangingData_t MultiRangingData1, MultiRangingData2;
+  VL53L4CX_MultiRangingData_t *pMultiRangingData1 = &MultiRangingData1;
+  VL53L4CX_MultiRangingData_t *pMultiRangingData2 = &MultiRangingData2;
   uint8_t NewDataReady = 0;
-  int no_of_object_found = 0, j;
-  char report[64];
-  int status;
+  int no_of_obj_found_1, no_of_obj_found_2 = 0;
+  char report1[64], report2[64];
+  int status1, status2;
 
   do {
-    status = sensor_vl53l4cx_sat.VL53L4CX_GetMeasurementDataReady(&NewDataReady);
+    status1 = tof1.VL53L4CX_GetMeasurementDataReady(&NewDataReady);
   } while (!NewDataReady);
 
-  if ((!status) && (NewDataReady != 0)) {
-    status = sensor_vl53l4cx_sat.VL53L4CX_GetMultiRangingData(pMultiRangingData);
-    no_of_object_found = pMultiRangingData->NumberOfObjectsFound;
-    snprintf(report, sizeof(report), "VL53L4CX Satellite: Count=%d, #Objs=%1d ", pMultiRangingData->StreamCount, no_of_object_found);
-    Serial.print(report);
-    for (j = 0; j < no_of_object_found; j++) {
+  if ((!status1) && (NewDataReady != 0)) {
+    status1 = tof1.VL53L4CX_GetMultiRangingData(pMultiRangingData1);
+    no_of_obj_found_1 = pMultiRangingData1->NumberOfObjectsFound;
+    snprintf(report1, sizeof(report1), "ToF 1: Count=%d, #Objs=%1d ", pMultiRangingData1->StreamCount, no_of_obj_found_1);
+    Serial.print(report1);
+    for (int j = 0; j < no_of_obj_found_1; j++) {
       if (j != 0) {
         Serial.print("\r\n                               ");
       }
-      Serial.print("status=");
-      Serial.print(pMultiRangingData->RangeData[j].RangeStatus);
+      //Serial.print("status=");
+      //Serial.print(pMultiRangingData->RangeData[j].RangeStatus);
       Serial.print(", D=");
-      Serial.print(pMultiRangingData->RangeData[j].RangeMilliMeter);
+      Serial.print(pMultiRangingData1->RangeData[j].RangeMilliMeter);
       Serial.print("mm");
-      Serial.print(", Signal=");
-      Serial.print((float)pMultiRangingData->RangeData[j].SignalRateRtnMegaCps / 65536.0);
-      Serial.print(" Mcps, Ambient=");
-      Serial.print((float)pMultiRangingData->RangeData[j].AmbientRateRtnMegaCps / 65536.0);
-      Serial.print(" Mcps");
-      if(pMultiRangingData->RangeData[j].RangeMilliMeter < 200){
+      //Serial.print(", Signal=");
+      //Serial.print((float)pMultiRangingData->RangeData[j].SignalRateRtnMegaCps / 65536.0);
+      //Serial.print(" Mcps, Ambient=");
+      //Serial.print((float)pMultiRangingData->RangeData[j].AmbientRateRtnMegaCps / 65536.0);
+      //Serial.print(" Mcps");
+      if(pMultiRangingData1->RangeData[j].RangeMilliMeter < 200){
         digitalWrite(LEDPIN, HIGH);
       } else {
         digitalWrite(LEDPIN, LOW);
       }
     }
     Serial.println("");
-    if (status == 0) {
-      status = sensor_vl53l4cx_sat.VL53L4CX_ClearInterruptAndStartMeasurement();
+    if (status1 == 0) {
+      status1 = tof1.VL53L4CX_ClearInterruptAndStartMeasurement();
+    }
+  }
+
+  // Check ToF 2
+  do {
+    status2 = tof2.VL53L4CX_GetMeasurementDataReady(&NewDataReady);
+  } while (!NewDataReady);
+
+  if ((!status2) && (NewDataReady != 0)) {
+    status2 = tof2.VL53L4CX_GetMultiRangingData(pMultiRangingData2);
+    no_of_obj_found_2 = pMultiRangingData2->NumberOfObjectsFound;
+    snprintf(report2, sizeof(report2), "ToF 2: Count=%d, #Objs=%1d ", pMultiRangingData2->StreamCount, no_of_obj_found_2);
+    Serial.print(report2);
+    for (int j = 0; j < no_of_obj_found_2; j++) {
+      if (j != 0) {
+        Serial.print("\r\n                               ");
+      }
+      //Serial.print("status=");
+      //Serial.print(pMultiRangingData->RangeData[j].RangeStatus);
+      Serial.print(", D=");
+      Serial.print(pMultiRangingData2->RangeData[j].RangeMilliMeter);
+      Serial.print("mm");
+      //Serial.print(", Signal=");
+      //Serial.print((float)pMultiRangingData->RangeData[j].SignalRateRtnMegaCps / 65536.0);
+      //Serial.print(" Mcps, Ambient=");
+      //Serial.print((float)pMultiRangingData->RangeData[j].AmbientRateRtnMegaCps / 65536.0);
+      //Serial.print(" Mcps");
+      if(pMultiRangingData2->RangeData[j].RangeMilliMeter < 200){
+        delay(250);
+      }
+    }
+    Serial.println("");
+    if (status2 == 0) {
+      status2 = tof2.VL53L4CX_ClearInterruptAndStartMeasurement();
     }
   }
 }
