@@ -52,80 +52,125 @@ void setup()
 
 void loop()
 {
-  VL53L4CX_MultiRangingData_t MultiRangingData1, MultiRangingData2;
-  VL53L4CX_MultiRangingData_t *pMultiRangingData1 = &MultiRangingData1;
-  VL53L4CX_MultiRangingData_t *pMultiRangingData2 = &MultiRangingData2;
+  VL53L4CX_MultiRangingData_t MultiRangingData;
+  VL53L4CX_MultiRangingData_t *pMultiRangingData = &MultiRangingData;
   uint8_t NewDataReady = 0;
-  int no_of_obj_found_1, no_of_obj_found_2 = 0;
-  char report1[64], report2[64];
-  int status1, status2;
+  int num_obj_found = 0;
+  char report[64];
+  int status;
 
-  do {
-    status1 = tof1.VL53L4CX_GetMeasurementDataReady(&NewDataReady);
-  } while (!NewDataReady);
+  // for(int i = 0; i < TOTAL_TOFS; i++) {
+  //   do {
+  //     status = tofs[i].VL53L4CX_GetMeasurementDataReady(&NewDataReady);
+  //   } while (!NewDataReady);
 
-  if ((!status1) && (NewDataReady != 0)) {
-    status1 = tof1.VL53L4CX_GetMultiRangingData(pMultiRangingData1);
-    no_of_obj_found_1 = pMultiRangingData1->NumberOfObjectsFound;
-    snprintf(report1, sizeof(report1), "ToF 1: Count=%d, #Objs=%1d ", pMultiRangingData1->StreamCount, no_of_obj_found_1);
-    Serial.print(report1);
-    for (int j = 0; j < no_of_obj_found_1; j++) {
-      if (j != 0) {
-        Serial.print("\r\n                               ");
-      }
-      //Serial.print("status=");
-      //Serial.print(pMultiRangingData->RangeData[j].RangeStatus);
-      Serial.print(", D=");
-      Serial.print(pMultiRangingData1->RangeData[j].RangeMilliMeter);
-      Serial.print("mm");
-      //Serial.print(", Signal=");
-      //Serial.print((float)pMultiRangingData->RangeData[j].SignalRateRtnMegaCps / 65536.0);
-      //Serial.print(" Mcps, Ambient=");
-      //Serial.print((float)pMultiRangingData->RangeData[j].AmbientRateRtnMegaCps / 65536.0);
-      //Serial.print(" Mcps");
-      if(pMultiRangingData1->RangeData[j].RangeMilliMeter < 200){
-        digitalWrite(LEDPIN, HIGH);
-      } else {
-        digitalWrite(LEDPIN, LOW);
-      }
-    }
-    Serial.println("");
-    if (status1 == 0) {
-      status1 = tof1.VL53L4CX_ClearInterruptAndStartMeasurement();
-    }
-  }
+  //   if ((!status) && (NewDataReady != 0)) {
+  //     status = tofs[i].VL53L4CX_GetMultiRangingData(pMultiRangingData);
+  //       num_obj_found = pMultiRangingData->NumberOfObjectsFound;
+  //       snprintf(report, sizeof(report), "ToF %d: Count=%d, #Objs=%1d ", i+1, pMultiRangingData->StreamCount, num_obj_found);
+  //       Serial.print(report);
+  //       for (int j = 0; j < num_obj_found; j++) {
+  //         if (j != 0) {
+  //           Serial.print("\r\n                               ");
+  //         }
+  //         //Serial.print("status=");
+  //         //Serial.print(pMultiRangingData->RangeData[j].RangeStatus);
+  //         Serial.print(", D=");
+  //         Serial.print(pMultiRangingData->RangeData[j].RangeMilliMeter);
+  //         Serial.print("mm");
+  //         //Serial.print(", Signal=");
+  //         //Serial.print((float)pMultiRangingData->RangeData[j].SignalRateRtnMegaCps / 65536.0);
+  //         //Serial.print(" Mcps, Ambient=");
+  //         //Serial.print((float)pMultiRangingData->RangeData[j].AmbientRateRtnMegaCps / 65536.0);
+  //         //Serial.print(" Mcps");
+  //         if(pMultiRangingData->RangeData[j].RangeMilliMeter < 200){
+  //           digitalWrite(LEDPIN, HIGH);
+  //         } else {
+  //           digitalWrite(LEDPIN, LOW);
+  //         }
+  //       }
+  //       Serial.println("");
+  //       if (status == 0) {
+  //         status = tofs[i].VL53L4CX_ClearInterruptAndStartMeasurement();
+  //       }
+  //     }
+  // }
 
-  // Check ToF 2
-  do {
-    status2 = tof2.VL53L4CX_GetMeasurementDataReady(&NewDataReady);
-  } while (!NewDataReady);
+  // VL53L4CX_MultiRangingData_t MultiRangingData1, MultiRangingData2;
+  // VL53L4CX_MultiRangingData_t *pMultiRangingData1 = &MultiRangingData1;
+  // VL53L4CX_MultiRangingData_t *pMultiRangingData2 = &MultiRangingData2;
+  // uint8_t NewDataReady = 0;
+  // int no_of_obj_found_1, no_of_obj_found_2 = 0;
+  // char report1[64], report2[64];
+  // int status1, status2;
 
-  if ((!status2) && (NewDataReady != 0)) {
-    status2 = tof2.VL53L4CX_GetMultiRangingData(pMultiRangingData2);
-    no_of_obj_found_2 = pMultiRangingData2->NumberOfObjectsFound;
-    snprintf(report2, sizeof(report2), "ToF 2: Count=%d, #Objs=%1d ", pMultiRangingData2->StreamCount, no_of_obj_found_2);
-    Serial.print(report2);
-    for (int j = 0; j < no_of_obj_found_2; j++) {
-      if (j != 0) {
-        Serial.print("\r\n                               ");
-      }
-      //Serial.print("status=");
-      //Serial.print(pMultiRangingData->RangeData[j].RangeStatus);
-      Serial.print(", D=");
-      Serial.print(pMultiRangingData2->RangeData[j].RangeMilliMeter);
-      Serial.print("mm");
-      //Serial.print(", Signal=");
-      //Serial.print((float)pMultiRangingData->RangeData[j].SignalRateRtnMegaCps / 65536.0);
-      //Serial.print(" Mcps, Ambient=");
-      //Serial.print((float)pMultiRangingData->RangeData[j].AmbientRateRtnMegaCps / 65536.0);
-      //Serial.print(" Mcps");
-      if(pMultiRangingData2->RangeData[j].RangeMilliMeter < 200){
-        delay(250);
-      }
-    }
-    Serial.println("");
-    if (status2 == 0) {
-      status2 = tof2.VL53L4CX_ClearInterruptAndStartMeasurement();
-    }
-  }
+  // do {
+  //   status1 = tof1.VL53L4CX_GetMeasurementDataReady(&NewDataReady);
+  // } while (!NewDataReady);
+
+  // if ((!status1) && (NewDataReady != 0)) {
+  //   status1 = tof1.VL53L4CX_GetMultiRangingData(pMultiRangingData1);
+  //   no_of_obj_found_1 = pMultiRangingData1->NumberOfObjectsFound;
+  //   snprintf(report1, sizeof(report1), "ToF 1: Count=%d, #Objs=%1d ", pMultiRangingData1->StreamCount, no_of_obj_found_1);
+  //   Serial.print(report1);
+  //   for (int j = 0; j < no_of_obj_found_1; j++) {
+  //     if (j != 0) {
+  //       Serial.print("\r\n                               ");
+  //     }
+  //     //Serial.print("status=");
+  //     //Serial.print(pMultiRangingData->RangeData[j].RangeStatus);
+  //     Serial.print(", D=");
+  //     Serial.print(pMultiRangingData1->RangeData[j].RangeMilliMeter);
+  //     Serial.print("mm");
+  //     //Serial.print(", Signal=");
+  //     //Serial.print((float)pMultiRangingData->RangeData[j].SignalRateRtnMegaCps / 65536.0);
+  //     //Serial.print(" Mcps, Ambient=");
+  //     //Serial.print((float)pMultiRangingData->RangeData[j].AmbientRateRtnMegaCps / 65536.0);
+  //     //Serial.print(" Mcps");
+  //     if(pMultiRangingData1->RangeData[j].RangeMilliMeter < 200){
+  //       digitalWrite(LEDPIN, HIGH);
+  //     } else {
+  //       digitalWrite(LEDPIN, LOW);
+  //     }
+  //   }
+  //   Serial.println("");
+  //   if (status1 == 0) {
+  //     status1 = tof1.VL53L4CX_ClearInterruptAndStartMeasurement();
+  //   }
+  // }
+
+  // // Check ToF 2
+  // do {
+  //   status2 = tof2.VL53L4CX_GetMeasurementDataReady(&NewDataReady);
+  // } while (!NewDataReady);
+
+  // if ((!status2) && (NewDataReady != 0)) {
+  //   status2 = tof2.VL53L4CX_GetMultiRangingData(pMultiRangingData2);
+  //   no_of_obj_found_2 = pMultiRangingData2->NumberOfObjectsFound;
+  //   snprintf(report2, sizeof(report2), "ToF 2: Count=%d, #Objs=%1d ", pMultiRangingData2->StreamCount, no_of_obj_found_2);
+  //   Serial.print(report2);
+  //   for (int j = 0; j < no_of_obj_found_2; j++) {
+  //     if (j != 0) {
+  //       Serial.print("\r\n                               ");
+  //     }
+  //     //Serial.print("status=");
+  //     //Serial.print(pMultiRangingData->RangeData[j].RangeStatus);
+  //     Serial.print(", D=");
+  //     Serial.print(pMultiRangingData2->RangeData[j].RangeMilliMeter);
+  //     Serial.print("mm");
+  //     //Serial.print(", Signal=");
+  //     //Serial.print((float)pMultiRangingData->RangeData[j].SignalRateRtnMegaCps / 65536.0);
+  //     //Serial.print(" Mcps, Ambient=");
+  //     //Serial.print((float)pMultiRangingData->RangeData[j].AmbientRateRtnMegaCps / 65536.0);
+  //     //Serial.print(" Mcps");
+  //     if(pMultiRangingData2->RangeData[j].RangeMilliMeter < 200){
+  //       delay(250);
+  //     }
+  //   }
+  //   Serial.println("");
+  //   if (status2 == 0) {
+  //     status2 = tof2.VL53L4CX_ClearInterruptAndStartMeasurement();
+  //   }
+  // }
+  delay(100);
 }
