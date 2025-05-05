@@ -15,9 +15,33 @@
 
 // Time of Flight VL53L4CX sensor declarations.
 VL53L4CX tofs[TOTAL_TOFS] = { VL53L4CX(&DEV_I2C, XSHUT_PIN_1), VL53L4CX(&DEV_I2C, XSHUT_PIN_2) };
+//VL53L4CX tofs[TOTAL_TOFS];
 
-// Addresses need to be even numbers or odd numbers (not consecutive)
+// Addresses need to be even numbers or odd numbers (not consecutive).
 unsigned char I2C_ADDRESSES[] = { 0x02, 0x04 };
+
+// "Pins" assigned by shift register for X_SHUT TOF pins.
+unsigned char XSHUT_PINS[TOTAL_TOFS];
+
+// Pin conneted to ST_CP of 74HC595 Shift Register
+int latchPin = 12;
+// Pin connected to SH_CP of 74HC595 Shift Register
+int clockPin = 11;
+// Pin connected to DS of 74HC595 Shift Register
+int dataPin = 13;
+
+void setupShiftRegister() {
+    // Set pins to output to control shift register
+    pinMode(latchPin, OUTPUT);
+    pinMode(clockPin, OUTPUT);
+    pinMode(dataPin, OUTPUT);
+    Serial.println("Pins for 74HC595 Shift Register set.");
+
+    for(int i = 0; i < TOTAL_TOFS; i++) {
+        XSHUT_PINS[i] = latchPin;
+        shiftOut(dataPin, clockPin, MSBFIRST, i);
+    }
+}
 
 void setupSensors() {
     // Initialize I2C bus.

@@ -54,6 +54,9 @@ void setup() {
   }
   Serial.println("Beginning setup...");
 
+  // 74HC595 Shift Register setup in sensors.h header file
+  //setupShiftRegister();
+
   // Sensor setup in sensors.h header file
   setupSensors();
 }
@@ -73,6 +76,9 @@ void loop() {
       // light up the red light on the board.
       if(pMultiRangingData->RangeData[j].RangeMinMilliMeter < 200) {
         digitalWrite(LEDPIN, HIGH);
+        Serial.print("TOF ");
+        Serial.print(i + 1);
+        Serial.println(" detected object less than 200mm away.");
       } else {
         digitalWrite(LEDPIN, LOW);
       }
