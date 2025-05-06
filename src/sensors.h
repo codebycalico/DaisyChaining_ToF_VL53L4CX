@@ -5,6 +5,7 @@
 #include <Arduino.h>
 #include <Wire.h>
 #include <vl53l4cx_class.h>
+///#include <ShiftRegister74HC595.h>
 
 #define DEV_I2C Wire
 
@@ -12,6 +13,8 @@
 
 #define XSHUT_PIN_1 A1
 #define XSHUT_PIN_2 A2
+
+//unsigned char XSHUT_PINS[TOTAL_TOFS] = { A1, A2 };
 
 // Time of Flight VL53L4CX sensor declarations.
 VL53L4CX tofs[TOTAL_TOFS] = { VL53L4CX(&DEV_I2C, XSHUT_PIN_1), VL53L4CX(&DEV_I2C, XSHUT_PIN_2) };
@@ -21,32 +24,43 @@ VL53L4CX tofs[TOTAL_TOFS] = { VL53L4CX(&DEV_I2C, XSHUT_PIN_1), VL53L4CX(&DEV_I2C
 unsigned char I2C_ADDRESSES[] = { 0x02, 0x04 };
 
 // "Pins" assigned by shift register for X_SHUT TOF pins.
-unsigned char XSHUT_PINS[TOTAL_TOFS];
+//byte xshuts = 0;
 
 // Pin conneted to ST_CP of 74HC595 Shift Register
 int latchPin = 12;
 // Pin connected to SH_CP of 74HC595 Shift Register
-int clockPin = 11;
+int clockPin = 13;
 // Pin connected to DS of 74HC595 Shift Register
-int dataPin = 13;
+int dataPin = 11;
+
+// create a global shift register object
+// parameters: <number of shift registers> (data pin, clock pin, latch pin)
+//ShiftRegister74HC595<1> xshuts(dataPin, clockPin, latchPin);
 
 void setupShiftRegister() {
     // Set pins to output to control shift register
-    pinMode(latchPin, OUTPUT);
-    pinMode(clockPin, OUTPUT);
-    pinMode(dataPin, OUTPUT);
-    Serial.println("Pins for 74HC595 Shift Register set.");
+    // pinMode(latchPin, OUTPUT);
+    // pinMode(clockPin, OUTPUT);
+    // pinMode(dataPin, OUTPUT);
+    // Serial.println("Latch, clock, and data pins for 74HC595 Shift Register are set.");
 
-    for(int i = 0; i < TOTAL_TOFS; i++) {
-        XSHUT_PINS[i] = latchPin;
-        shiftOut(dataPin, clockPin, MSBFIRST, i);
-    }
+    // for(int i = 0; i < TOTAL_TOFS; i++) {
+    //     digitalWrite(latchPin, LOW);
+    //     shiftOut(dataPin, clockPin, MSBFIRST, xshuts);
+    // }
+    //xshuts.setAllLow();
+    //Serial.println("All 595 Shift Register pins set to low.");
 }
 
 void setupSensors() {
     // Initialize I2C bus.
     DEV_I2C.begin();
     Serial.println("I2C bus initialized.");
+
+    // for(int i = 0; i < TOTAL_TOFS; i++) {
+    //     tofs[i] = VL53L4CX(&DEV_I2C, XSHUT_PINS[i]);
+    // }
+    // Serial.println("ToFs declared using for loop.");
 
     // Configure VL53L4CX satellite component.
     // Sets the shut pin as OUTPUT, then writes it to LOW
