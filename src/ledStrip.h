@@ -56,3 +56,30 @@ void lightSections(uint8_t tubesCompleted) {
             break;
     }
 }
+
+void gameCompleted() {
+    fill_solid(ledStrip, NUM_LEDS_TOTAL, CRGB::Black);
+    FastLED.show();
+
+    for(int i = 0; i < NUM_LEDS_TOTAL; i++) {
+        ledStrip[i] = CRGB::Red;
+        FastLED.show();
+        delay(50);
+    }
+
+    for(int i = 0; i < NUM_LEDS_TOTAL; i++) {
+        ledStrip[i] = CRGB::Black;
+        FastLED.show();
+        delay(50);
+    }
+
+    for(int i = 0; i < 3; i++) {
+        fill_solid(ledStrip, NUM_LEDS_TOTAL, CRGB::Red);
+        FastLED.show();
+        delay(100);
+    
+        fill_solid(ledStrip, NUM_LEDS_TOTAL, CRGB::Black);
+        FastLED.show();
+        delay(100);
+    }
+}

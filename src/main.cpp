@@ -92,6 +92,7 @@ void loop() {
   Serial.print("tubesCompleted = ");
   Serial.println(tubesCompleted);
   delay(500);
+  gameCompleted();
 }
 
 // Gameplay for tracking each tube that has been completed when an
