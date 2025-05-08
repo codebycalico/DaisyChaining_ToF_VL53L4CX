@@ -37,12 +37,23 @@
  *
  ******************************************************************************/
 // Adapted by Calico Randall for OMSI's How Fast
-// Chaining multiple ToF VL53L4CX sensors together
+// Chaining multiple ToF VL53L4CX sensors together and
+// having it affect sections of an LED strip based on if
+// each of the ToFs has detected an object within a specific range.
 // April 8, 2025
 
-#include "sensors.h"
+#include "tofSensors.h"
+#include "ledStrip.h"
 
+// LED pin on the Itsy Bitsy board.
 #define LEDPIN 13
+
+// Keeping count of the tubes that have successfully been completed.
+// Range should be from 0 to TOTAL_TOFS.
+uint8_t tubesCompleted = 0;
+
+// Declaring the gameplay function.
+uint8_t gameplay(uint8_t completed);
 
 void setup() {
   // LED on board
@@ -54,36 +65,70 @@ void setup() {
   }
   Serial.println("Beginning setup...");
 
-  // 74HC595 Shift Register setup in sensors.h header file
-  //setupShiftRegister();
-
-  // Sensor setup in sensors.h header file
+  // Sensor setup in sensors.h header file.
   setupSensors();
+
+  // LED Strip setup in ledStrip.h header file.
+  setupLEDStrip();
 }
 
 void loop() {
+  // While the total number of tubes completed is less than
+  // the total ToFs, continue the game play.
+  while(tubesCompleted < TOTAL_TOFS) {
+    Serial.print("Tubes completed = ");
+    Serial.println(tubesCompleted);
+
+    lightSections(tubesCompleted);
+
+    // Update the tubes completed as the game is played.
+    tubesCompleted = gameplay(tubesCompleted);
+
+    delay(100);
+  }
+
+  lightSections(tubesCompleted);
+  Serial.println("All tubes completed!");
+  Serial.print("tubesCompleted = ");
+  Serial.println(tubesCompleted);
+  delay(500);
+}
+
+// Gameplay for tracking each tube that has been completed when an
+// object is detected within a specific range of the ToF.
+uint8_t gameplay(uint8_t completed) {
   VL53L4CX_MultiRangingData_t MultiRangingData;
   VL53L4CX_MultiRangingData_t *pMultiRangingData = &MultiRangingData;
-  uint8_t num_obj_found = 0;
-  int status;
 
-  for (int i = 0; i < TOTAL_TOFS; i++) {
-    status = tofs[i].VL53L4CX_WaitMeasurementDataReady();
-    status = tofs[i].VL53L4CX_GetMultiRangingData(pMultiRangingData);
-    num_obj_found = pMultiRangingData->NumberOfObjectsFound;
-    for(int j = 0; j < num_obj_found; j++) {
-      // if either sensor detects an object less than 200mm,
-      // light up the red light on the board.
-      if(pMultiRangingData->RangeData[j].RangeMinMilliMeter < 200) {
-        digitalWrite(LEDPIN, HIGH);
-        Serial.print("TOF ");
-        Serial.print(i + 1);
-        Serial.println(" detected object less than 200mm away.");
+  int status = tofs[completed].VL53L4CX_WaitMeasurementDataReady();
+  status = tofs[completed].VL53L4CX_GetMultiRangingData(pMultiRangingData);
+  uint8_t num_obj_found = pMultiRangingData->NumberOfObjectsFound;
+
+  for(int j = 0; j < num_obj_found; j++) {
+    // If the sensor detects something within a certain range,
+    // light up the corresponding section of the tube and 
+    // look at the next ToF.
+    if(pMultiRangingData->RangeData[j].RangeMinMilliMeter <= 50) {
+      digitalWrite(LEDPIN, HIGH);
+      Serial.print("TOF ");
+      Serial.print(completed + 1);
+      Serial.println(" completed.");
+      delay(100);
+
+      // Add one to the number of tubes completed if object detected within
+      // a specific range. 
+      // If we were at the last tube, return TOTAL_TOFS. 
+      if(completed + 1 == TOTAL_TOFS) {
+        return TOTAL_TOFS;
       } else {
-        digitalWrite(LEDPIN, LOW);
+        completed++;
       }
+    } else {
+      // Keep this for future testing. If something wrong with LEDs,
+      // the LED pin on the board will indicate that.
+      digitalWrite(LEDPIN, LOW);
     }
-    status = tofs[i].VL53L4CX_ClearInterruptAndStartMeasurement();
   }
-  delay(100);
+  status = tofs[completed].VL53L4CX_ClearInterruptAndStartMeasurement();
+  return completed;
 }
