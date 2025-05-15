@@ -105,7 +105,7 @@ uint8_t gameplay(uint8_t completed) {
   status = tofs[completed].VL53L4CX_GetMultiRangingData(pMultiRangingData);
   uint8_t num_obj_found = pMultiRangingData->NumberOfObjectsFound;
 
-  for(int j = 0; j < num_obj_found; j++) {
+  for(int j = 1; j < num_obj_found; j++) {
     // If the sensor detects something within a certain range,
     // light up the corresponding section of the tube and 
     // look at the next ToF.
