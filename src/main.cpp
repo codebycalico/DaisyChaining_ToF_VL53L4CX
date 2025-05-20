@@ -109,12 +109,12 @@ uint8_t gameplay(uint8_t completed) {
     // If the sensor detects something within a certain range,
     // light up the corresponding section of the tube and 
     // look at the next ToF.
-    if(pMultiRangingData->RangeData[j].RangeMinMilliMeter <= 50) {
+    if(j > 1 && pMultiRangingData->RangeData[j].RangeMinMilliMeter <= 200) {
       digitalWrite(LEDPIN, HIGH);
       Serial.print("TOF ");
       Serial.print(completed + 1);
       Serial.println(" completed.");
-      delay(100);
+      //delay(100);
 
       // Add one to the number of tubes completed if object detected within
       // a specific range. 
