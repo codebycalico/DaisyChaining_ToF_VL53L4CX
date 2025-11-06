@@ -36,11 +36,14 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *
  ******************************************************************************/
-// Adapted by Calico Randall for OMSI's How Fast
-// Chaining multiple ToF VL53L4CX sensors together and
-// having it affect sections of an LED strip based on if
-// each of the ToFs has detected an object within a specific range.
-// April 8, 2025
+
+/*
+* Adapted by Calico Randall for OMSI's How Fast
+* Chaining multiple ToF VL53L4CX sensors together and
+* having it affect sections of an LED strip based on if
+* each of the ToFs has detected an object within a specific range.
+* April 8, 2025
+*/
 
 #include "tofSensors.h"
 #include "ledStrip.h"
@@ -106,9 +109,11 @@ uint8_t gameplay(uint8_t completed) {
   uint8_t num_obj_found = pMultiRangingData->NumberOfObjectsFound;
 
   for(int j = 1; j < num_obj_found; j++) {
-    // If the sensor detects something within a certain range,
-    // light up the corresponding section of the tube and 
-    // look at the next ToF.
+    /*
+    * If the sensor detects something within a certain range,
+    * light up the corresponding section of the tube and 
+    * look at the next ToF.
+    */
     if(j > 1 && pMultiRangingData->RangeData[j].RangeMinMilliMeter <= 200) {
       digitalWrite(LEDPIN, HIGH);
       Serial.print("TOF ");
