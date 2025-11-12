@@ -46,7 +46,7 @@
 */
 
 #include "tofSensors.h"
-#include "ledStrip.h"
+//#include "ledStrip.h"
 
 // LED pin on the Itsy Bitsy board.
 #define LEDPIN 13
@@ -72,7 +72,7 @@ void setup() {
   setupSensors();
 
   // LED Strip setup in ledStrip.h header file.
-  setupLEDStrip();
+  //setupLEDStrip();
 }
 
 void loop() {
@@ -82,7 +82,7 @@ void loop() {
     Serial.print("Tubes completed = ");
     Serial.println(tubesCompleted);
 
-    lightSections(tubesCompleted);
+    //lightSections(tubesCompleted);
 
     // Update the tubes completed as the game is played.
     tubesCompleted = gameplay(tubesCompleted);
@@ -90,12 +90,12 @@ void loop() {
     delay(100);
   }
 
-  lightSections(tubesCompleted);
+  //lightSections(tubesCompleted);
   Serial.println("All tubes completed!");
   Serial.print("tubesCompleted = ");
   Serial.println(tubesCompleted);
   delay(500);
-  gameCompleted();
+  //gameCompleted();
 }
 
 // Gameplay for tracking each tube that has been completed when an
