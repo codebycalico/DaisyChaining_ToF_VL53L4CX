@@ -12,7 +12,7 @@
 
 #define DEV_I2C Wire
 
-#define TOTAL_TOFS 2
+#define TOTAL_TOFS 1
 
 // Define each XSHUT pin for each ToF.
 #define XSHUT_PIN_1 A1
@@ -22,8 +22,8 @@
 // VL53L4CX_Error configStatus;
 
 // Time of Flight VL53L4CX sensor declarations.
-VL53L4CX tofs[TOTAL_TOFS] = {VL53L4CX(&DEV_I2C, XSHUT_PIN_1), VL53L4CX(&DEV_I2C, XSHUT_PIN_2)};
-
+// VL53L4CX tofs[TOTAL_TOFS] = {VL53L4CX(&DEV_I2C, XSHUT_PIN_1), VL53L4CX(&DEV_I2C, XSHUT_PIN_2)};
+VL53L4CX tofs[TOTAL_TOFS] = {VL53L4CX(&DEV_I2C, XSHUT_PIN_1)};
 // Addresses need to be even numbers or odd numbers (not consecutive).
 unsigned char I2C_ADDRESSES[] = {0x02, 0x04};
 

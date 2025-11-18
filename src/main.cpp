@@ -83,8 +83,8 @@ void loop()
   // the total ToFs, continue the game play.
   while (tubesCompleted < TOTAL_TOFS)
   {
-    Serial.print("Tubes completed = ");
-    Serial.println(tubesCompleted);
+    // Serial.print("Tubes completed = ");
+    // Serial.println(tubesCompleted);
 
     // lightSections(tubesCompleted);
 
@@ -95,10 +95,10 @@ void loop()
   }
 
   // lightSections(tubesCompleted);
-  Serial.println("All tubes completed!");
-  Serial.print("tubesCompleted = ");
-  Serial.println(tubesCompleted);
-  delay(500);
+  // Serial.println("All tubes completed!");
+  // Serial.print("tubesCompleted = ");
+  // Serial.println(tubesCompleted);
+  // delay(500);
   // gameCompleted();
 }
 
@@ -119,38 +119,44 @@ uint8_t gameplay(uint8_t completed)
   // Starting j at 1 to skip over the first object found (assuming that is the tube).
   for (int j = 0; j < num_obj_found; j++)
   {
-    /*
-     * If the sensor detects something within a certain range,
-     * light up the corresponding section of the tube and
-     * look at the next ToF.
-     */
-    if (pMultiRangingData->RangeData[j].RangeMinMilliMeter <= 200)
-    {
-      digitalWrite(LEDPIN, HIGH);
-      Serial.print("TOF ");
-      Serial.print(completed + 1);
-      Serial.println(" completed.");
-      // delay(100);
-
-      // Add one to the number of tubes completed if object detected within
-      // a specific range.
-      // If we were at the last tube, return TOTAL_TOFS.
-      if (completed + 1 == TOTAL_TOFS)
-      {
-        return TOTAL_TOFS;
-      }
-      else
-      {
-        completed++;
-      }
-    }
-    else
-    {
-      // Keep this for future testing. If something wrong with LEDs,
-      // the LED pin on the board will indicate that.
-      digitalWrite(LEDPIN, LOW);
-    }
+    Serial.print("Distance: ");
+    Serial.println(pMultiRangingData->RangeData[j].RangeMinMilliMeter);
+    return 0;
   }
-  status = tofs[completed].VL53L4CX_ClearInterruptAndStartMeasurement();
-  return completed;
 }
+/*
+ * If the sensor detects something within a certain range,
+ * light up the corresponding section of the tube and
+ * look at the next ToF.
+ */
+/*
+if (pMultiRangingData->RangeData[j].RangeMinMilliMeter <= 200)
+{
+  digitalWrite(LEDPIN, HIGH);
+  Serial.print("TOF ");
+  Serial.print(completed + 1);
+  Serial.println(" completed.");
+  // delay(100);
+
+  // Add one to the number of tubes completed if object detected within
+  // a specific range.
+  // If we were at the last tube, return TOTAL_TOFS.
+  if (completed + 1 == TOTAL_TOFS)
+  {
+    return TOTAL_TOFS;
+  }
+  else
+  {
+    completed++;
+  }
+}
+else
+{
+  // Keep this for future testing. If something wrong with LEDs,
+  // the LED pin on the board will indicate that.
+  digitalWrite(LEDPIN, LOW);
+}
+}
+status = tofs[completed].VL53L4CX_ClearInterruptAndStartMeasurement();
+return completed;
+} */
